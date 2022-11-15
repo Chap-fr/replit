@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "dev": "ts-node-dev src/index.ts",
+    "build": "",
+    "preview": ""
   },
   "dependencies": {
     "apollo-server": "^3.11.1",
