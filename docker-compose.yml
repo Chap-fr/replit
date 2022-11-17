@@ -8,34 +8,45 @@ services:
       - ./src:/src
     command: npm run start:dev
     ports:
-      - "5000:5000"
+      - 5000:5000
     environment:
       NODE_ENV: development
       DEBUG: nodejs-docker-express:*
-    networks:
-      - dockerlan
     restart: always
     depends_on:
-      - bdd
+      bdd:
+        condition: service_healthy
 
   bdd:
-    image: postgres:15.1-alpine
+    image: postgres
+    # build:
+    #   context: ./postgres/
     environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PGDATA=/var/lib/postgresql/data
+      POSTGRES_USER: wildcode
+      POSTGRES_PASSWORD: azeaze
+      POSTGRES_DB: wildcodeDB
+      PGDATA: /var/lib/postgresql/data/wildcodeDB
     volumes:
-      - db-data:/var/lib/postgresql/data
-      - ${PWD}/postgres/home:/root
+      - db-data-wildcodeDB:/var/lib/postgresql/data/wildcodeDB
+      # - ./db-init-scripts:/docker-entrypoint-initdb.d
+      # - ./postgres/home:/root
     ports:
-      - "5432:5432"
-    networks:
-      - dockerlan
+      - 5432:5432
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d wildcodeDB -U wildcode"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
-networks:
-  dockerlan:
-    driver: bridge
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8081:8080
+    depends_on:
+      bdd:
+        condition: service_healthy
 
 volumes:
-  db-data:
+  db-data-wildcodeDB:
